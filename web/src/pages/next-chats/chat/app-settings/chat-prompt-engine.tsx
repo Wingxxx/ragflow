@@ -52,6 +52,11 @@ export function ChatPromptEngine() {
         label={t('multiTurn')}
         tooltip={t('multiTurnTip')}
       ></SwitchFormField>
+      <SwitchFormField
+        name={'prompt_config.strict_citation'}
+        label={t('strictCitation')}
+        tooltip={t('strictCitationTip')}
+      ></SwitchFormField>
       <UseKnowledgeGraphFormField name="prompt_config.use_kg"></UseKnowledgeGraphFormField>
       <RerankFormFields></RerankFormFields>
       <CrossLanguageFormField></CrossLanguageFormField>

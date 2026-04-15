@@ -657,7 +657,7 @@ async def async_chat(dialog, messages, stream=True, **kwargs):
     msg = [{"role": "system", "content": prompt_config["system"].format(**kwargs)+attachments_}]
     prompt4citation = ""
     if knowledges and (prompt_config.get("quote", True) and kwargs.get("quote", True)):
-        prompt4citation = citation_prompt()
+        prompt4citation = citation_prompt(strict_citation=prompt_config.get("strict_citation", False))
     msg.extend([{"role": m["role"], "content": re.sub(r"##\d+\$\$", "", m["content"])} for m in messages if m["role"] != "system"])
     used_token_count, msg = message_fit_in(msg, int(max_tokens * 0.95))
     if llm_type == "chat" and image_attachments:

@@ -909,6 +909,9 @@ This auto-tagging feature enhances retrieval by adding another layer of domain-s
       multiTurn: 'Multi-turn optimization',
       multiTurnTip:
         'This optimizes user queries using context in a multi-round conversation. When enabled, it will consume additional LLM tokens.',
+      strictCitation: 'Strict citation',
+      strictCitationTip:
+        'When enabled, answers will strictly cite only content from the knowledge base. If the answer is not found in the context, it will respond with "Unable to answer based on current information."',
       howUseId: 'How to use chat ID?',
       description: 'Description of assistant',
       descriptionPlaceholder: "I'm a chat assistant.",

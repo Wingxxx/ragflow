@@ -163,6 +163,7 @@ def memory_prompt(message_list, max_tokens):
 
 CITATION_PROMPT_TEMPLATE = load_prompt("citation_prompt")
 CITATION_PLUS_TEMPLATE = load_prompt("citation_plus")
+STRICT_CITATION_PROMPT_TEMPLATE = load_prompt("strict_citation_system")
 CONTENT_TAGGING_PROMPT_TEMPLATE = load_prompt("content_tagging_prompt")
 CROSS_LANGUAGES_SYS_PROMPT_TEMPLATE = load_prompt("cross_languages_sys_prompt")
 CROSS_LANGUAGES_USER_PROMPT_TEMPLATE = load_prompt("cross_languages_user_prompt")
@@ -186,8 +187,11 @@ ASK_SUMMARY = load_prompt("ask_summary")
 PROMPT_JINJA_ENV = jinja2.Environment(autoescape=False, trim_blocks=True, lstrip_blocks=True)
 
 
-def citation_prompt(user_defined_prompts: dict = {}) -> str:
-    template = PROMPT_JINJA_ENV.from_string(user_defined_prompts.get("citation_guidelines", CITATION_PROMPT_TEMPLATE))
+def citation_prompt(user_defined_prompts: dict = {}, strict_citation: bool = False) -> str:
+    if strict_citation:
+        template = PROMPT_JINJA_ENV.from_string(STRICT_CITATION_PROMPT_TEMPLATE)
+    else:
+        template = PROMPT_JINJA_ENV.from_string(user_defined_prompts.get("citation_guidelines", CITATION_PROMPT_TEMPLATE))
     return template.render()
 
 

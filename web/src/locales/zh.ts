@@ -825,6 +825,9 @@ General：实体和关系提取提示来自 GitHub - microsoft/graphrag：基于
       multiTurn: '多轮对话优化',
       multiTurnTip:
         '在多轮对话时，对查询问题根据上下文进行优化。会调用大模型额外消耗 token。',
+      strictCitation: '严格原文引用',
+      strictCitationTip:
+        '开启后，回答将严格只引用知识库中的内容。如果上下文中没有找到答案，将回复"根据现有资料无法回答该问题"。',
       howUseId: '如何使用聊天ID？',
       description: '助理描述',
       descriptionPlaceholder: '我是一个聊天助手。',

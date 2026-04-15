@@ -57,6 +57,7 @@ export function ChatSettings({ hasSingleChatBox }: ChatSettingsProps) {
         reasoning: false,
         cross_languages: [],
         toc_enhance: false,
+        strict_citation: false,
       },
       top_n: 8,
       similarity_threshold: 0.2,

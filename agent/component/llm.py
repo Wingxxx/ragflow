@@ -48,6 +48,7 @@ class LLMParam(ComponentParamBase):
         self.frequency_penalty = 0
         self.output_structure = None
         self.cite = True
+        self.strict_citation = False
         self.visual_files_var = None
 
     def check(self):
@@ -255,7 +256,7 @@ class LLM(ComponentBase):
         msg, sys_prompt = self._sys_prompt_and_msg(self._canvas.get_history(self._param.message_history_window_size)[:-1], args)
         user_defined_prompt, sys_prompt = self._extract_prompts(sys_prompt)
         if self._param.cite and self._canvas.get_reference()["chunks"]:
-            sys_prompt += citation_prompt(user_defined_prompt)
+            sys_prompt += citation_prompt(user_defined_prompt, strict_citation=self._param.strict_citation)
 
         return sys_prompt, msg, user_defined_prompt
 
