@@ -731,6 +731,8 @@ A: 检查 `--mcp-host-api-key` 配置的 Key 是否与 RagFlow 账号的 API Key
 
 * [ ] DeerFlow 重启加载配置
 
+* [ ] （可选）跨网络连接：RagFlow 已加入 DeerFlow 网络
+
 ### 7.3 Custom Tool 模式（若使用）
 
 * [ ] 环境变量 `RAGFLOW_BASE_URL` 已设置
@@ -741,45 +743,79 @@ A: 检查 `--mcp-host-api-key` 配置的 Key 是否与 RagFlow 账号的 API Key
 
 * [ ] Tool 已注册到 DeerFlow
 
+### 7.5 Docker 网络配置（跨网络访问）
+
+若 DeerFlow 与 RagFlow 不在同一个 Docker 网络，需要将 RagFlow 加入 DeerFlow 的网络：
+
+```bash
+# 将 RagFlow 容器加入 DeerFlow 网络
+docker network connect docker_deer-flow-dev docker-ragflow-cpu-1
+```
+
+执行后 RagFlow 将同时在两个网络上：
+
+| 网络 | IP 地址 | 说明 |
+|------|---------|------|
+| `docker_ragflow` | `172.18.0.6` | RagFlow 默认网络 |
+| `docker_deer-flow-dev` | `192.168.200.4` | DeerFlow 网络 |
+
+**验证容器 IP：**
+
+```bash
+docker inspect docker-ragflow-cpu-1 --format '{{json .NetworkSettings.Networks}}' | ConvertFrom-Json | ForEach-Object { $_.PSObject.Properties | ForEach-Object { "$($_.Name): $($_.Value.IPAddress)" } }
+```
+
 ***
 
-## 八、代码修改记录
+## 八、实际配置记录
 
-> 本节记录所有需要的代码修改，按优先级排列。
+> 本节记录实际执行的配置操作。
 
-### 优先级 1：MCP 模式（无需代码修改）
+### 8.1 docker-compose.yml MCP 配置
 
-```diff
-# extensions_config.json
-{
-  "mcpServers": {
-+   "ragflow": {
-+     "enabled": true,
-+     "type": "sse",
-+     "url": "http://ragflow-server:9382/sse",
-+     "headers": {
-+       "Authorization": "Bearer ragflow-xxxxx"
-+     }
-+   }
-  }
-}
+**文件：** `ragflow/docker/docker-compose.yml`
+
+**修改内容：** 在 `ragflow-cpu` 服务的 `command` 中添加：
+
+```yaml
+command:
+  - --enable-adminserver
+  - --enable-mcpserver
+  - --mcp-host=0.0.0.0
+  - --mcp-port=9382
+  - --mcp-base-url=http://127.0.0.1:9380
+  - --mcp-script-path=/ragflow/mcp/server/server.py
+  - --mcp-mode=self-host
+  - --mcp-host-api-key=ragflow-7CVSA7RY6fQx7A9tj68Iv4nLUtkCq6ITuivd9z-nHaU
 ```
 
-### 优先级 2：Custom Tool 模式（如需完整功能）
+### 8.2 Docker 网络配置
 
-**新增文件：**
+**操作：** 将 RagFlow 容器加入 DeerFlow 网络
 
+```bash
+docker network connect docker_deer-flow-dev docker-ragflow-cpu-1
 ```
-deer-flow/backend/packages/harness/deerflow/tools/builtins/ragflow_tool.py
+
+**结果：** RagFlow 现在同时在两个网络上：
+
+| 网络 | IP 地址 |
+|------|---------|
+| `docker_ragflow` | `172.18.0.6` |
+| `docker_deer-flow-dev` | `192.168.200.4` |
+
+### 8.3 MCP 服务验证
+
+```bash
+# 检查端口
+netstat -an | findstr "9382"
+
+# 检查日志
+docker logs docker-ragflow-cpu-1 2>&1 | findstr "MCP"
+
+# 测试 MCP 端点
+curl -s -X GET "http://localhost:9382/mcp" -H "Accept: application/json, text/event-stream"
 ```
-
-**修改文件：**
-
-| 文件                                                                   | 修改内容                                          |
-| -------------------------------------------------------------------- | --------------------------------------------- |
-| `deer-flow/backend/packages/harness/deerflow/tools/__init__.py`      | 导出 RagFlowTool                                |
-| `deer-flow/backend/packages/harness/deerflow/tools/builtin_tools.py` | 注册 ragflow\_retrieve, ragflow\_list\_datasets |
-| `deer-flow/.env`                                                     | 添加 RAGFLOW\_BASE\_URL, RAGFLOW\_API\_KEY      |
 
 ***
 
